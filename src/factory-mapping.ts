@@ -14,7 +14,7 @@ import {
   MolochV2Template,
 } from "../generated/templates";
 
-import { Moloch, Member, DaoMeta } from "../generated/schema";
+import { Dao, Member, MemberUri } from "../generated/schema";
 
 import {
   createAndApproveToken,
@@ -31,11 +31,11 @@ export function handleRegisterV1(event: RegisterV1): void {
 
   MolochV1Template.create(event.params.moloch);
 
-  let daoMeta = new DaoMeta(event.params.moloch.toHex());
-  daoMeta.title = event.params.title;
-  daoMeta.version = "1";
-  daoMeta.newContract = event.params.newContract.toString();
-  daoMeta.save();
+  // let daoMeta = new DaoMeta(event.params.moloch.toHex());
+  // daoMeta.title = event.params.title;
+  // daoMeta.version = "1";
+  // daoMeta.newContract = event.params.newContract.toString();
+  // daoMeta.save();
 
   event.block.timestamp.toHexString().concat(event.logIndex.toHexString());
 
@@ -44,24 +44,26 @@ export function handleRegisterV1(event: RegisterV1): void {
 
 export function handleRegisterV2(event: RegisterV2): void {
   MolochV2Template.create(event.params.moloch);
-
+	
   let molochId = event.params.moloch.toHex();
-  let moloch = new Moloch(molochId);
-  let daoMeta = new DaoMeta(event.params.moloch.toHex());
-  daoMeta.title = event.params.title;
-  daoMeta.version = "2";
-  daoMeta.newContract = "1";
-  daoMeta.save();
+  let memberUri = new MemberUri(molochId);
 
-  let tokens = event.params.tokens;
-  let approvedTokens: string[] = [];
+  let moloch = new Dao(molochId);
+  // let daoMeta = new DaoMeta(event.params.moloch.toHex());
+  // daoMeta.title = event.params.title;
+  // daoMeta.version = "2";
+  // daoMeta.newContract = "1";
+  // daoMeta.save();
 
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i];
-    approvedTokens.push(createAndApproveToken(molochId, token));
-    createEscrowTokenBalance(molochId, token);
-    createGuildTokenBalance(molochId, token);
-  }
+  // let tokens = event.params.tokens;
+  // let approvedTokens: string[] = [];
+
+  // for (let i = 0; i < tokens.length; i++) {
+  //   let token = tokens[i];
+  //   approvedTokens.push(createAndApproveToken(molochId, token));
+  //   createEscrowTokenBalance(molochId, token);
+  //   createGuildTokenBalance(molochId, token);
+  // }
 
   moloch.summoner = event.params.summoner;
   moloch.summoningTime = event.params._summoningTime;
@@ -118,12 +120,14 @@ export function handleRegisterV2(event: RegisterV2): void {
 export function handleSummonV21(event: SummonComplete): void {
   MolochV21Template.create(event.params.moloch);
   let molochId = event.params.moloch.toHexString();
-  let moloch = new Moloch(molochId);
+  let moloch = new Dao(molochId);
+  let memberUri = new MemberUri(molochId);
 
-  let daoMeta = new DaoMeta(event.params.moloch.toHex());
-  daoMeta.version = "2.1";
-  daoMeta.newContract = "1";
-  daoMeta.save();
+
+  // let daoMeta = new DaoMeta(event.params.moloch.toHex());
+  // daoMeta.version = "2.1";
+  // daoMeta.newContract = "1";
+  // daoMeta.save();
 
   let eventSummoners: Address[] = event.params.summoner;
   let summoners: string[] = [];
@@ -141,14 +145,14 @@ export function handleSummonV21(event: SummonComplete): void {
     summoners.push(createAndAddSummoner(molochId, summoner, shares, event));
   }
 
-  let tokens = event.params.tokens;
-  let approvedTokens: string[] = [];
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i];
-    approvedTokens.push(createAndApproveToken(molochId, token));
-    createEscrowTokenBalance(molochId, token);
-    createGuildTokenBalance(molochId, token);
-  }
+  // let tokens = event.params.tokens;
+  // let approvedTokens: string[] = [];
+  // for (let i = 0; i < tokens.length; i++) {
+  //   let token = tokens[i];
+  //   approvedTokens.push(createAndApproveToken(molochId, token));
+  //   createEscrowTokenBalance(molochId, token);
+  //   createGuildTokenBalance(molochId, token);
+  // }
 
   moloch.summoningTime = event.params.summoningTime;
   moloch.createdAt = event.params.summoningTime.toString();
@@ -161,8 +165,6 @@ export function handleSummonV21(event: SummonComplete): void {
   moloch.proposalDeposit = event.params.proposalDeposit;
   moloch.dilutionBound = event.params.dilutionBound;
   moloch.processingReward = event.params.processingReward;
-  moloch.approvedTokens = approvedTokens;
-  moloch.depositToken = approvedTokens[0];
   moloch.totalLoot = BigInt.fromI32(0);
   moloch.totalShares = mTotalShares;
 
@@ -173,29 +175,29 @@ export function handleSummonV21(event: SummonComplete): void {
 
 export function handleRegisterV21(event: RegisterV21): void {
   let molochId = event.params.moloch.toHexString();
-  let moloch = Moloch.load(molochId);
+  let moloch = Dao.load(molochId);
 
   if (moloch) {
     moloch.version = event.params.version.toString();
     moloch.save();
   }
 
-  let daoMeta = DaoMeta.load(event.params.moloch.toHex());
-  if (daoMeta) {
-    daoMeta.title = event.params.title;
-    daoMeta.version = event.params.version.toString();
-    daoMeta.newContract = event.params.daoIdx.toString();
-    daoMeta.http = event.params.http.toString();
+  // let daoMeta = DaoMeta.load(event.params.moloch.toHex());
+  // if (daoMeta) {
+  //   daoMeta.title = event.params.title;
+  //   daoMeta.version = event.params.version.toString();
+  //   daoMeta.newContract = event.params.daoIdx.toString();
+  //   daoMeta.http = event.params.http.toString();
 
-    daoMeta.save();
-  }
+  //   daoMeta.save();
+  // }
 
   addTransaction(event.block, event.transaction);
 }
 
 export function handleDelete(event: Delete): void {
   let molochId = event.address.toHexString();
-  let moloch = Moloch.load(molochId);
+  let moloch = Dao.load(molochId);
 
   if (moloch) {
     moloch.deleted = true;
@@ -215,9 +217,8 @@ export function createAndAddSummoner(
   let memberId = molochId.concat("-member-").concat(summoner.toHex());
   let member = new Member(memberId);
 
-  member.moloch = molochId;
+  member.dao = molochId;
   member.createdAt = event.block.timestamp.toString();
-  member.molochAddress = event.params.moloch;
   member.memberAddress = summoner;
   member.delegateKey = summoner;
   member.shares = shares;
@@ -229,18 +230,18 @@ export function createAndAddSummoner(
   member.kicked = false;
 
   //Set summoner summoner balances for approved tokens to zero, is this needed?
-  let tokens = event.params.tokens;
+  // let tokens = event.params.tokens;
 
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i];
-    let tokenId = molochId.concat("-token-").concat(token.toHex());
-    createMemberTokenBalance(
-      molochId,
-      member.memberAddress,
-      tokenId,
-      BigInt.fromI32(0)
-    );
-  }
+  // for (let i = 0; i < tokens.length; i++) {
+  //   let token = tokens[i];
+  //   let tokenId = molochId.concat("-token-").concat(token.toHex());
+  //   createMemberTokenBalance(
+  //     molochId,
+  //     member.memberAddress,
+  //     tokenId,
+  //     BigInt.fromI32(0)
+  //   );
+  // }
 
   member.save();
 
