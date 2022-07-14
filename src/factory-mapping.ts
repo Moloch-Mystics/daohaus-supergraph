@@ -22,7 +22,6 @@ import {
   createGuildTokenBalance,
   createMemberTokenBalance,
 } from "./v2-mapping";
-import { addTransaction } from "./transactions";
 
 export function handleRegisterV1(event: RegisterV1): void {
   if (event.params.newContract.toString() == "0") {
@@ -39,7 +38,6 @@ export function handleRegisterV1(event: RegisterV1): void {
 
   event.block.timestamp.toHexString().concat(event.logIndex.toHexString());
 
-  addTransaction(event.block, event.transaction);
 }
 
 export function handleRegisterV2(event: RegisterV2): void {
@@ -114,7 +112,6 @@ export function handleRegisterV2(event: RegisterV2): void {
     );
   }
 
-  addTransaction(event.block, event.transaction);
 }
 
 export function handleSummonV21(event: SummonComplete): void {
@@ -170,7 +167,6 @@ export function handleSummonV21(event: SummonComplete): void {
 
   moloch.save();
 
-  addTransaction(event.block, event.transaction);
 }
 
 export function handleRegisterV21(event: RegisterV21): void {
@@ -192,7 +188,6 @@ export function handleRegisterV21(event: RegisterV21): void {
   //   daoMeta.save();
   // }
 
-  addTransaction(event.block, event.transaction);
 }
 
 export function handleDelete(event: Delete): void {
@@ -203,7 +198,6 @@ export function handleDelete(event: Delete): void {
     moloch.deleted = true;
     moloch.save();
 
-    addTransaction(event.block, event.transaction);
   }
 }
 

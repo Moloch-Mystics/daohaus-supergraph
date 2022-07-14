@@ -2,14 +2,8 @@ import { BigInt, Address, log } from "@graphprotocol/graph-ts";
 import { SummonComplete } from "../generated/V22Factory/V22Factory";
 import { MolochV22Template } from "../generated/templates";
 
-import { Moloch, Member, DaoMeta, SafeMinion } from "../generated/schema";
+import { Dao, Member, } from "../generated/schema";
 
-import {
-  createAndApproveToken,
-  createEscrowTokenBalance,
-  createGuildTokenBalance,
-  createMemberTokenBalance,
-} from "./v2-mapping";
 import { addTransaction } from "./transactions";
 
 // event SummonComplete(
@@ -31,10 +25,10 @@ export function handleSummonV22(event: SummonComplete): void {
   let molochId = event.params.moloch.toHexString();
   let moloch = new Moloch(molochId);
 
-  let daoMeta = new DaoMeta(event.params.moloch.toHex());
-  daoMeta.version = "2.2";
-  daoMeta.newContract = "1";
-  daoMeta.save();
+  // let daoMeta = new DaoMeta(event.params.moloch.toHex());
+  // daoMeta.version = "2.2";
+  // daoMeta.newContract = "1";
+  // daoMeta.save();
 
   let creator: Address = event.params._summoner;
   moloch.summoner = creator;
@@ -42,14 +36,14 @@ export function handleSummonV22(event: SummonComplete): void {
   // create summoner with 0 shares
   createAndAddSummoner(molochId, creator, BigInt.fromI32(0), event);
 
-  let tokens = event.params.tokens;
-  let approvedTokens: string[] = [];
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i];
-    approvedTokens.push(createAndApproveToken(molochId, token));
-    createEscrowTokenBalance(molochId, token);
-    createGuildTokenBalance(molochId, token);
-  }
+  // let tokens = event.params.tokens;
+  // let approvedTokens: string[] = [];
+  // for (let i = 0; i < tokens.length; i++) {
+  //   let token = tokens[i];
+  //   approvedTokens.push(createAndApproveToken(molochId, token));
+  //   createEscrowTokenBalance(molochId, token);
+  //   createGuildTokenBalance(molochId, token);
+  // }
 
   moloch.summoningTime = event.params.summoningTime;
   moloch.createdAt = event.params.summoningTime.toString();
@@ -62,8 +56,6 @@ export function handleSummonV22(event: SummonComplete): void {
   moloch.proposalDeposit = event.params.proposalDeposit;
   moloch.dilutionBound = event.params.dilutionBound;
   moloch.processingReward = event.params.processingReward;
-  moloch.approvedTokens = approvedTokens;
-  moloch.depositToken = approvedTokens[0];
   moloch.totalLoot = BigInt.fromI32(0);
   moloch.totalShares = BigInt.fromI32(0);
   moloch.v22Setup = false;
@@ -71,7 +63,6 @@ export function handleSummonV22(event: SummonComplete): void {
 
   moloch.save();
 
-  addTransaction(event.block, event.transaction);
 }
 
 // used to create multiple summoners at time of summoning
@@ -97,22 +88,22 @@ export function createAndAddSummoner(
   member.exists = true;
   member.proposedToKick = false;
   member.kicked = false;
-  member.isDao = Moloch.load(summoner.toHex()) ? summoner.toHexString() : null;
-  member.isSafeMinion = SafeMinion.load(summoner.toHex()) ? summoner.toHexString() : null;
+  // member.isDao = Moloch.load(summoner.toHex()) ? summoner.toHexString() : null;
+  // member.isSafeMinion = SafeMinion.load(summoner.toHex()) ? summoner.toHexString() : null;
 
   //Set summoner summoner balances for approved tokens to zero
   let tokens = event.params.tokens;
 
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i];
-    let tokenId = molochId.concat("-token-").concat(token.toHex());
-    createMemberTokenBalance(
-      molochId,
-      member.memberAddress,
-      tokenId,
-      BigInt.fromI32(0)
-    );
-  }
+  // for (let i = 0; i < tokens.length; i++) {
+  //   let token = tokens[i];
+  //   let tokenId = molochId.concat("-token-").concat(token.toHex());
+  //   createMemberTokenBalance(
+  //     molochId,
+  //     member.memberAddress,
+  //     tokenId,
+  //     BigInt.fromI32(0)
+  //   );
+  // }
 
   member.save();
 
